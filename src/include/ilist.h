@@ -69,6 +69,12 @@ public:
 
     class iterator {
     public:
+
+        using value_type        = T;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = T*;
+        using reference         = T&;
+
         explicit iterator(node* current) noexcept : current_(current)
         {
         }
@@ -90,7 +96,7 @@ public:
 
         bool operator==(const iterator& o) const noexcept { return current_ == o.current_; }
 
-        [[nodiscard]] T& operator*() const noexcept { return *static_cast<T*>(current_); }
+        [[nodiscard]] reference operator*() const noexcept { return *static_cast<T*>(current_); }
 
     private:
         node* current_;

@@ -85,8 +85,7 @@ public:
 
         while (nSlotsTraversed--) {
             for (auto it = slots_[c_idx_].begin(); it != slots_[c_idx_].end();) {
-                auto nIt = it;
-                ++nIt;
+                const auto nIt = std::next(it);
                 if ((*it).n_loops_ == 0) {
                     (*it).expire();
                     (*it).unlink();
