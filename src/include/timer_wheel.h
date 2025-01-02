@@ -31,7 +31,7 @@ namespace br {
 template <typename MUTEX_LOCK=detail_::void_mutex>
 class basic_expirable;
 
-using expirable = basic_expirable<>;
+using expirable    = basic_expirable<>;
 using ts_expirable = basic_expirable<std::mutex>;
 
 template <typename MUTEX_LOCK>
@@ -40,20 +40,22 @@ using basic_expirables_list = ilist<basic_expirable<MUTEX_LOCK>, MUTEX_LOCK>;
 template <typename MUTEX_LOCK=detail_::void_mutex>
 class basic_timer_wheel;
 
-using timer_wheel = basic_timer_wheel<>;
+using timer_wheel    = basic_timer_wheel<>;
 using ts_timer_wheel = basic_timer_wheel<std::mutex>;
+
+using time_point = std::chrono::time_point<std::chrono::steady_clock>;
 
 template <typename MUTEX_LOCK>
 class basic_expirable: public basic_expirables_list<MUTEX_LOCK>::node {
     friend class basic_timer_wheel<MUTEX_LOCK>;
 
 public:
-    basic_expirable() noexcept                            = default;
+    basic_expirable() noexcept                                  = default;
+    virtual ~basic_expirable()                                  = default;
     basic_expirable(const basic_expirable&) noexcept            = default;
     basic_expirable& operator=(const basic_expirable&) noexcept = default;
     basic_expirable(basic_expirable&&) noexcept                 = default;
     basic_expirable& operator=(basic_expirable&&) noexcept      = default;
-    virtual    ~basic_expirable()                         = default;
 
     virtual void expire() = 0;
 
@@ -64,18 +66,18 @@ private:
 template <typename MUTEX_LOCK>
 class basic_timer_wheel {
 public:
-    explicit basic_timer_wheel(std::chrono::duration<uint64_t>                          sd,
-                         std::size_t                                              ns,
-                         const std::chrono::time_point<std::chrono::steady_clock> st) noexcept
+    explicit basic_timer_wheel(std::chrono::duration<uint64_t> sd,
+                               std::size_t                     ns,
+                               const time_point                st) noexcept
         : c_idx_(0)
+        , start_time_(st)
         , slot_duration_(sd)
         , one_loop_duration_(slot_duration_ * ns)
-        , start_time_(st)
         , slots_(ns)
     {
     }
 
-    void check_expiration(std::chrono::time_point<std::chrono::steady_clock> now)
+    void check_expiration(const time_point now)
     {
         const auto elapsed         = now - start_time_;
         auto       nSlotsTraversed = elapsed / slot_duration_;
@@ -98,8 +100,8 @@ public:
         }
     }
 
-    void publish(basic_expirable<MUTEX_LOCK>*                                   e,
-                 const std::chrono::time_point<std::chrono::steady_clock> expirationTime) noexcept
+    void publish(basic_expirable<MUTEX_LOCK>* e,
+                 const time_point             expirationTime) noexcept
     {
         const auto timeDiff = expirationTime - start_time_;
         const auto nSlots   = timeDiff / slot_duration_;
@@ -111,11 +113,12 @@ public:
     }
 
 private:
-    size_t c_idx_;
+    size_t     c_idx_;
+    time_point start_time_;
 
-    const std::chrono::duration<uint64_t>                 slot_duration_;
-    const std::chrono::duration<uint64_t>                 one_loop_duration_;
-    std::chrono::time_point<std::chrono::steady_clock>    start_time_;
+    const std::chrono::duration<uint64_t> slot_duration_;
+    const std::chrono::duration<uint64_t> one_loop_duration_;
+
     std::vector<ilist<basic_expirable<MUTEX_LOCK>, MUTEX_LOCK>> slots_;
 };
 } // namespace br
