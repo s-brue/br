@@ -18,7 +18,8 @@ include_directories(${br_SOURCE_DIR}/src/include
 
 add_executable(brTS
                ilist_ts.cc
-        timer_wheel_ts.cc
+               timer_wheel_ts.cc
+               spinlock_ts.cc
 )
 
 target_link_libraries(brTS GTest::gtest_main)

@@ -4,4 +4,5 @@ add_library(br
             STATIC
             ilist.cc
             timer_wheel.cc
-            )
+            spinlock.cc
+)
