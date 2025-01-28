@@ -43,9 +43,12 @@ public:
         while (!l_.compare_exchange_weak(expected,
                                          std::this_thread::get_id(),
                                          std::memory_order_release,
-                                         std::memory_order_relaxed)) {
+                                         std::memory_order_acquire)) {
             expected = static_cast<std::thread::id>(0);
-        }
+#if defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86)
+            __asm ("pause");
+#endif
+         }
     }
 
     void unlock() noexcept
@@ -54,7 +57,7 @@ public:
         const bool same_thread = l_.compare_exchange_strong(expected,
                                                             static_cast<std::thread::id>(0),
                                                             std::memory_order_release,
-                                                            std::memory_order_relaxed);
+                                                            std::memory_order_acquire);
         assert(
             same_thread &&
             "This thread is trying to unlock a non-locked spinlock or locked by another thread");
@@ -75,7 +78,7 @@ private:
 
     // Please note:
     static_assert(std::atomic<std::thread::id>::is_always_lock_free,
-                  "Thread::id must be a real atomic to use this implementation");
+                  "Thread::id must be a real basic atomic to use this implementation");
 };
 } // namespace br
 
