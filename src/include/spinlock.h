@@ -29,13 +29,13 @@
 #include <cassert>
 
 namespace br {
-class SpinLock {
+class spinlock {
 public:
-    SpinLock() noexcept             = default;
-    SpinLock(SpinLock&)             = delete;
-    SpinLock(SpinLock&&)            = delete;
-    SpinLock& operator=(SpinLock&)  = delete;
-    SpinLock& operator=(SpinLock&&) = delete;
+    spinlock() noexcept             = default;
+    spinlock(spinlock&)             = delete;
+    spinlock(spinlock&&)            = delete;
+    spinlock& operator=(spinlock&)  = delete;
+    spinlock& operator=(spinlock&&) = delete;
 
     void lock() noexcept
     {

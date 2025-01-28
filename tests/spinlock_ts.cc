@@ -20,16 +20,16 @@ protected:
 
 TEST_F(SpinLockTest, Basic)
 {
-    br::SpinLock sl;
+    br::spinlock sl;
 
     sl.lock();
 
 
-    std::jthread t {[&sl](){std::unique_lock<br::SpinLock> l(sl); printf("done\n");} };
+    std::jthread t {[&sl](){std::unique_lock<br::spinlock> l(sl); printf("done\n");} };
 
     printf("Hello\n");
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     sl.unlock();
 
