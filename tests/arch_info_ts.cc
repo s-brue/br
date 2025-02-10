@@ -29,5 +29,8 @@ TEST_F(ArchInfoTest, Basic)
             std::cout << "[" << cpu.id() << "] ";
         }
         std::cout << std::endl;
+        std::cout << "Total memory: " << nnode.mem_total() << " KB, free: " << nnode.mem_free() << " KB" << std::endl;
     }
+
+    br::arch_info::set_this_thread_cpu_affinity(0);
 }

@@ -24,7 +24,8 @@
 #define BR_ARCH_INFO_H_
 
 #include <vector>
-
+#include <cstdint>
+#include <thread>
 
 namespace br {
 
@@ -32,8 +33,8 @@ class cpu_info {
     friend class arch_info;
 
 public:
-    cpu_info(unsigned cpu_id);
-    unsigned id() const;
+    cpu_info(unsigned) noexcept;
+    [[nodiscard]] unsigned id() const noexcept;
 
 private:
     unsigned cpu_id_;
@@ -43,19 +44,30 @@ class numa_node_info {
     friend class arch_info;
 
 public:
-    const std::vector<cpu_info>& cpus() const;
+    [[nodiscard]] const std::vector<cpu_info>& cpus() const noexcept;
+    [[nodiscard]] std::uint64_t                mem_total() const noexcept;
+    [[nodiscard]] std::uint64_t                mem_free() const noexcept;
 
 private:
     std::vector<cpu_info> cpus_;
+    std::uint64_t         mem_total_;
+    std::uint64_t         mem_free_;
 };
 
 class arch_info {
 public:
     arch_info();
 
-    const std::vector<numa_node_info>& numa_nodes() const;
-    unsigned                           number_of_numa_nodes() const;
-    bool                               info_ready() const;
+    [[nodiscard]] const std::vector<numa_node_info>& numa_nodes() const noexcept;
+    [[nodiscard]] unsigned                           number_of_numa_nodes() const noexcept;
+    [[nodiscard]] bool                               info_ready() const noexcept;
+
+    static void set_cpu_affinity(std::thread&, unsigned) noexcept;
+    static void set_cpu_affinity(std::jthread&, unsigned) noexcept;
+
+    static void set_this_thread_cpu_affinity(unsigned) noexcept;
+    static void set_this_process_cpu_affinity(unsigned) noexcept;
+
 
 private:
     std::vector<numa_node_info> numa_nodes_;
