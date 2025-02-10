@@ -5,10 +5,10 @@
 
 #include "ilist.h"
 
-class IlistTest: public testing::Test {
+class IListTest: public testing::Test {
 protected:
-    IlistTest()           = default;
-    ~IlistTest() override = default;
+    IListTest()           = default;
+    ~IListTest() override = default;
 
     void SetUp() override
     {
@@ -27,7 +27,7 @@ protected:
 };
 
 
-TEST_F(IlistTest, Basic)
+TEST_F(IListTest, Basic)
 {
     LW l;
 
@@ -39,7 +39,7 @@ TEST_F(IlistTest, Basic)
     EXPECT_TRUE(l.empty());
 }
 
-TEST_F(IlistTest, Push)
+TEST_F(IListTest, Push)
 {
     LW l;
 
@@ -62,7 +62,7 @@ TEST_F(IlistTest, Push)
     EXPECT_EQ(l.size(), 0);
 }
 
-TEST_F(IlistTest, Linking)
+TEST_F(IListTest, Linking)
 {
     LW l;
 
@@ -84,7 +84,7 @@ TEST_F(IlistTest, Linking)
     EXPECT_TRUE(l.empty());
 }
 
-TEST_F(IlistTest, Updating)
+TEST_F(IListTest, Updating)
 {
     LW l;
 
@@ -113,7 +113,7 @@ TEST_F(IlistTest, Updating)
 }
 
 
-TEST_F(IlistTest, Clear)
+TEST_F(IListTest, Clear)
 {
     LW l;
 

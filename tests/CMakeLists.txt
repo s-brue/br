@@ -12,17 +12,15 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-include_directories(${br_SOURCE_DIR}/src/include
-                    ${br_SOURCE_DIR}/src/include
-                    )
 
 add_executable(brTS
                ilist_ts.cc
                timer_wheel_ts.cc
                spinlock_ts.cc
+               arch_info_ts.cc
 )
 
-target_link_libraries(brTS GTest::gtest_main)
+target_link_libraries(brTS GTest::gtest_main br)
 
 include(GoogleTest)
 gtest_discover_tests(brTS)
