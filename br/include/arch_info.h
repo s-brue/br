@@ -66,8 +66,6 @@ public:
     static void set_cpu_affinity(std::jthread&, unsigned) noexcept;
 
     static void set_this_thread_cpu_affinity(unsigned) noexcept;
-    static void set_this_process_cpu_affinity(unsigned) noexcept;
-
 
 private:
     std::vector<numa_node_info> numa_nodes_;

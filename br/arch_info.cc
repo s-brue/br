@@ -39,6 +39,10 @@
 
 #endif
 
+#if defined(__MINGW32__)
+#include <pthread.h>
+#endif
+
 #include <iostream>
 
 namespace br {
@@ -159,7 +163,35 @@ bool arch_info::info_ready() const noexcept
 }
 
 namespace {
-#if defined(__linux__)
+#if defined(_WIN32)
+void _set_cpu_affinity(HANDLE t, unsigned cpu_id) noexcept
+{
+    const DWORD_PTR cpu_mask = (1 << cpu_id);
+    if (SetThreadAffinityMask(t, cpu_mask) == 0) {
+        std::cerr << "Error: Could change thread affinity for CPU " << cpu_id << std::endl;
+    }
+}
+#if defined(__MINGW32__)
+void _set_cpu_affinity(pthread_t t, unsigned cpu_id) noexcept
+{
+    const DWORD threadId = GetThreadId(reinterpret_cast<HANDLE>(t));
+    if (!threadId) {
+        std::cerr << "Error: Cannot obtain thread id. Could change thread affinity for CPU " << cpu_id << std::endl;
+        return;
+    }
+
+    HANDLE ht = OpenThread(THREAD_ALL_ACCESS, FALSE, threadId);
+    if (!ht) {
+        std::cerr << "Error: Could change thread affinity for CPU " << cpu_id << std::endl;
+    }
+    const DWORD_PTR cpu_mask = (1 << cpu_id);
+    SetThreadAffinityMask(ht, cpu_mask);
+    CloseHandle(ht);
+}
+
+#endif
+
+#elif defined(__linux__)
 void _set_cpu_affinity(pthread_t t, unsigned cpu_id) noexcept
 {
     cpu_set_t cpuset;
@@ -181,15 +213,14 @@ void _set_cpu_affinity(pid_t pid, unsigned cpu_id) noexcept
         std::cerr << "Error: Could change process affinity for CPU " << cpu_id << std::endl;
     }
 }
-
-
 #endif
 
 } // namespace
 
 void arch_info::set_cpu_affinity(std::thread& th, unsigned cpu_id) noexcept
 {
-#if defined(_WIN32)
+#if defined(__MINGW32__)
+    _set_cpu_affinity(th.native_handle(), cpu_id);
 #elif defined(__linux__)
     _set_cpu_affinity(th.native_handle(), cpu_id);
 #endif
@@ -197,7 +228,8 @@ void arch_info::set_cpu_affinity(std::thread& th, unsigned cpu_id) noexcept
 
 void arch_info::set_cpu_affinity(std::jthread& jth, unsigned cpu_id) noexcept
 {
-#if defined(_WIN32)
+#if defined(__MINGW32__)
+    _set_cpu_affinity(jth.native_handle(), cpu_id);
 #elif defined(__linux__)
     _set_cpu_affinity(jth.native_handle(), cpu_id);
 #endif
@@ -206,18 +238,12 @@ void arch_info::set_cpu_affinity(std::jthread& jth, unsigned cpu_id) noexcept
 void arch_info::set_this_thread_cpu_affinity(unsigned cpu_id) noexcept
 {
 #if defined(_WIN32)
+    _set_cpu_affinity(GetCurrentThread(), cpu_id);
 #elif defined(__linux__)
     _set_cpu_affinity(pthread_self(), cpu_id);
 #endif
 }
 
-void arch_info::set_this_process_cpu_affinity(unsigned cpu_id) noexcept
-{
-#if defined(_WIN32)
-#elif defined(__linux__)
-    _set_cpu_affinity(getpid(), cpu_id);
-#endif
-}
 
 
 } // br
