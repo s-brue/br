@@ -35,7 +35,6 @@
 #include <regex>
 #include <sched.h>
 #include <pthread.h>
-#include <unistd.h>
 
 #endif
 
@@ -193,25 +192,15 @@ void _set_cpu_affinity(pthread_t t, unsigned cpu_id) noexcept
 #elif defined(__linux__)
 void _set_cpu_affinity(pthread_t t, unsigned cpu_id) noexcept
 {
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(cpu_id, &cpuset);
+    cpu_set_t cpu_set;
+    CPU_ZERO(&cpu_set);
+    CPU_SET(cpu_id, &cpu_set);
 
-    if (pthread_setaffinity_np(t, sizeof(cpu_set_t), &cpuset) != 0) {
+    if (pthread_setaffinity_np(t, sizeof(cpu_set_t), &cpu_set) != 0) {
         std::cerr << "Error: Could change thread affinity for CPU " << cpu_id << std::endl;
     }
 }
 
-void _set_cpu_affinity(pid_t pid, unsigned cpu_id) noexcept
-{
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(cpu_id, &cpuset);
-
-    if (sched_setaffinity(pid, sizeof(cpuset), &cpuset) != -1) {
-        std::cerr << "Error: Could change process affinity for CPU " << cpu_id << std::endl;
-    }
-}
 #endif
 
 } // namespace
