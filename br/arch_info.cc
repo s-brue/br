@@ -188,7 +188,6 @@ void _set_cpu_affinity(pthread_t t, unsigned cpu_id) noexcept
     SetThreadAffinityMask(ht, cpu_mask);
     CloseHandle(ht);
 }
-
 #endif
 
 #elif defined(__linux__)
@@ -223,6 +222,8 @@ void arch_info::set_cpu_affinity(std::thread& th, unsigned cpu_id) noexcept
     _set_cpu_affinity(th.native_handle(), cpu_id);
 #elif defined(__linux__)
     _set_cpu_affinity(th.native_handle(), cpu_id);
+#else
+#error "Non supported platform, please try to use set_this_thread_cpu_affinity()"
 #endif
 }
 
@@ -232,6 +233,8 @@ void arch_info::set_cpu_affinity(std::jthread& jth, unsigned cpu_id) noexcept
     _set_cpu_affinity(jth.native_handle(), cpu_id);
 #elif defined(__linux__)
     _set_cpu_affinity(jth.native_handle(), cpu_id);
+#else
+#error "Non supported platform, please try to use set_this_thread_cpu_affinity()"
 #endif
 }
 
@@ -241,9 +244,10 @@ void arch_info::set_this_thread_cpu_affinity(unsigned cpu_id) noexcept
     _set_cpu_affinity(GetCurrentThread(), cpu_id);
 #elif defined(__linux__)
     _set_cpu_affinity(pthread_self(), cpu_id);
+#else
+#error "Non supported platform"
 #endif
 }
-
 
 
 } // br
